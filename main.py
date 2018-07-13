@@ -121,7 +121,7 @@ if __name__ == "__main__":
             _detail_json_url = "http://d3.weather.com.cn/webgis_rain_new/webgis/minute?lat={0}&lon={1}".format(loc["Latitude"], loc["Longitude"])
             status_desc = pull_json_parse(_detail_json_url)['msg']
 
-            if "雨" in status_desc or "雨" in status:
+            if (not "不会下雨" in status_desc) or "雨" in status_desc or "雨" in status:
                 rainy_last_time = datetime.now()
                 prepare.say("您好，请注意：")
                 prepare.say("{0}附近".format(location))
