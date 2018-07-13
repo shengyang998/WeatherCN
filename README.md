@@ -17,6 +17,8 @@ tmux new -s WeatherCN
 python3 main.py
 <C-b d>
 ```
+
+### Or in background: 
 ```shell
 nohup python3 main.py &
 ```
