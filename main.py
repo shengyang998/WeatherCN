@@ -11,6 +11,7 @@ logging.basicConfig(level=logging.INFO, filename="log", format='%(asctime)s  %(f
 logger = logging.getLogger(__name__)
 
 from gtts_prepare import prepare
+from ProxyController import ProxyController
 
 
 def extract_first(html, xpath_str):
@@ -40,23 +41,26 @@ def get_loc_with_GPS_macos(path_to_whereami="/usr/local/bin/whereami"):
 
 
 def get_loc_with_ip():
+    pc = ProxyController.ProxyController()
+    pc.env_proxy_off()
     loc = dict()
     __url = 'http://ipinfo.io/json'
     data = pull_json_parse(__url)
     loca = data['loc'].split(',')
     loc['Latitude'] = loca[0]
     loc['Longitude'] = loca[1]
+    pc.env_proxy_on()
     return loc
 
 
 def get_loc():
-    loc = dict()
     try:
         loc = get_loc_with_GPS_macos()
+        logger.info("Location (GPS): \nLatitude: {0}, Longitude: {1}, Accuracy (m): {2}, Timestamp: {3}".format(loc["Latitude"], loc["Longitude"], loc["Accuracy (m)"], loc["Timestamp"]))
     except:
         loc = get_loc_with_ip()
+        logger.info("Location (IP): \nLatitude: {0}, Longitude: {1}".format(loc["Latitude"], loc["Longitude"]))
 
-    logger.info("Location: \nLatitude: {0}, Longitude: {1}, Accuracy (m): {2}, Timestamp: {3}".format(loc["Latitude"], loc["Longitude"], loc["Accuracy (m)"], loc["Timestamp"]))
     return loc
 
 
@@ -121,11 +125,12 @@ if __name__ == "__main__":
             _detail_json_url = "http://d3.weather.com.cn/webgis_rain_new/webgis/minute?lat={0}&lon={1}".format(loc["Latitude"], loc["Longitude"])
             status_desc = pull_json_parse(_detail_json_url)['msg']
 
-            if (not "不会下雨" in status_desc) or "雨" in status_desc or "雨" in status:
-                rainy_last_time = datetime.now()
-                prepare.say("您好，请注意：")
-                prepare.say("{0}附近".format(location))
-                prepare.say("{0}".format(status_desc))
+            if "雨" in status_desc or "雨" in status:
+                if "不会下雨" not in status_desc:
+                    rainy_last_time = datetime.now()
+                    prepare.say("您好，请注意：")
+                    prepare.say("{0}附近".format(location))
+                    prepare.say("{0}".format(status_desc))
             
             if datetime.now() - normal_last_time > timedelta(minutes=120):
                 normal_last_time = datetime.now()
