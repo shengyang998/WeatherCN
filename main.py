@@ -3,11 +3,10 @@ import logging
 from lxml import etree
 import urllib3
 import json
-import re
 from time import sleep
 from datetime import datetime, timedelta
 
-logging.basicConfig(level=logging.INFO, filename="log", format='%(asctime)s  %(filename)s : %(levelname)s  %(message)s')
+logging.basicConfig(level=logging.DEBUG, filename="log", format='%(asctime)s  %(filename)s : %(levelname)s  %(message)s')
 logger = logging.getLogger(__name__)
 
 from gtts_prepare import prepare
@@ -23,7 +22,7 @@ def extract_first(html, xpath_str):
     """
     r = html.xpath(xpath_str)
     if len(r) > 0:
-        return re.sub('\s', '', html.xpath(xpath_str)[0].strip())
+        return prepare.rm_space(html.xpath(xpath_str)[0].strip())
     else:
         logger.warning("None detected!")
         return None
@@ -123,26 +122,33 @@ if __name__ == "__main__":
             air_lev = air['level']
 
             _detail_json_url = "http://d3.weather.com.cn/webgis_rain_new/webgis/minute?lat={0}&lon={1}".format(loc["Latitude"], loc["Longitude"])
-            status_desc = pull_json_parse(_detail_json_url)['msg']
+            status_desc = prepare.rm_space(pull_json_parse(_detail_json_url)['msg'])
 
             if "雨" in status_desc or "雨" in status:
                 if "不会下雨" not in status_desc:
-                    rainy_last_time = datetime.now()
-                    prepare.say("您好，请注意：")
-                    prepare.say("{0}附近".format(location))
-                    prepare.say("{0}".format(status_desc))
-            
+                    if status_desc.find("分钟") != -1:
+                        try:
+                            logger.debug("time to rain parsed from string: {0}".format(int(status_desc[:status_desc.find("分钟")])))
+                            if int(status_desc[:status_desc.find("分钟")]) <= 47:
+                                rainy_last_time = datetime.now()
+                                prepare.say("您好，请注意：")
+                                prepare.say("{0}附近".format(location))
+                                prepare.say("{0}".format(status_desc))
+                        except:
+                            pass
+
             if datetime.now() - normal_last_time > timedelta(minutes=120):
                 normal_last_time = datetime.now()
                 prepare.say("您好，接下来播报")
                 prepare.say("{0}附近".format(location))
-                prepare.say("的天气情况，当前温度：")
-                prepare.say("{0}摄氏度".format(degree))
+                prepare.say("的天气情况")
+                prepare.say("当前温度：{0}摄氏度".format(degree))
                 prepare.say("天气：{0}".format(status))
                 prepare.say("{0}".format(wind))
                 prepare.say("{0}".format(humidity))
                 prepare.say("空气质量：{0}".format(air_lev))
-                prepare.say("另外：{0}。".format(status_desc))
+                prepare.say("另外")
+                prepare.say("{0}".format(status_desc))
                 prepare.say("感谢收听，再见。")
 
             sleep(900)  # 15mins

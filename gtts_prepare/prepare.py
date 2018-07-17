@@ -1,8 +1,13 @@
 from gtts import gTTS
 import logging
 import os
+import re
 
 logger = logging.getLogger(__name__)
+
+
+def rm_space(s):
+    return re.sub('\s', '', s)
 
 
 def prepare(time=0.5, status="雨", base_path="voices/"):
@@ -50,6 +55,7 @@ def say(s, base_path="voices/"):
     if s == "":
         return
 
+    s = rm_space(s)
     filename = s + ".mp3"
     if not os.path.isfile("{0}{1}".format(base_path, filename)):
         tts = gTTS(text=s, lang='zh-cn')
