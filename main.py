@@ -139,16 +139,16 @@ if __name__ == "__main__":
 
             if datetime.now() - normal_last_time > timedelta(minutes=120):
                 normal_last_time = datetime.now()
-                prepare.say("您好，接下来播报")
-                prepare.say("{0}附近".format(location))
-                prepare.say("的天气情况")
-                prepare.say("当前温度：{0}摄氏度".format(degree))
-                prepare.say("天气：{0}".format(status))
-                prepare.say("{0}".format(wind))
-                prepare.say("{0}".format(humidity))
-                prepare.say("空气质量：{0}".format(air_lev))
-                prepare.say("另外")
-                prepare.say("{0}".format(status_desc))
-                prepare.say("感谢收听，再见。")
+                # prepare.say("您好，接下来播报")
+                # prepare.say("{0}附近".format(location))
+                # prepare.say("的天气情况")
+                # prepare.say("当前温度：{0}摄氏度".format(degree))
+                # prepare.say("天气：{0}".format(status))
+                # prepare.say("{0}".format(wind))
+                # prepare.say("{0}".format(humidity))
+                # prepare.say("空气质量：{0}".format(air_lev))
+                # prepare.say("另外")
+                # prepare.say("{0}".format(status_desc))
+                # prepare.say("感谢收听，再见。")
 
             sleep(900)  # 15mins
